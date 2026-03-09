@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: securedoc-postgres
+    environment:
+      POSTGRES_DB: securedoc_db
+      POSTGRES_USER: securedoc_user
+      POSTGRES_PASSWORD: securedoc_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - securedoc-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U securedoc_user -d securedoc_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+
+networks:
+  securedoc-network:
+    driver: bridge
