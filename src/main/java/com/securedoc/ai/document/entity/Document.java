@@ -44,4 +44,7 @@ public class Document {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(name = "content", columnDefinition = "TEXT")
+    private String content;
 }
