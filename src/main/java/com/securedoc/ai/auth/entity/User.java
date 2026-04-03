@@ -1,6 +1,7 @@
 package com.securedoc.ai.auth.entity;
 
 
+import com.securedoc.ai.document.entity.Document;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,7 +26,8 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name="user_id")
+    private Long user_id;
 
     @Column(name = "first_name", nullable = false,length = 100)
     private String firstName;
@@ -91,11 +93,16 @@ public class User implements UserDetails {
         if (this == o) return true;
         if (!(o instanceof User)) return false;
         User user = (User) o;
-        return id != null && id.equals(user.id);
+        return user_id!= null && user_id.equals(user.user_id);
     }
 
     @Override
     public int hashCode() {
         return getClass().hashCode();
     }
+
+    @OneToMany(mappedBy = "user",  cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Document> documents;
+
+
 }
