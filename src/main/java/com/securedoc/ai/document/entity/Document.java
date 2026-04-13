@@ -1,11 +1,13 @@
 package com.securedoc.ai.document.entity;
 
 import com.securedoc.ai.auth.entity.User;
+import com.securedoc.ai.pii.entity.PiiDetectionRecord;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Table(name = "documents")
@@ -47,4 +49,7 @@ public class Document {
 
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
+
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PiiDetectionRecord> piiDetections;
 }

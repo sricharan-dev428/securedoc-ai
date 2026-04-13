@@ -4,6 +4,10 @@ import com.securedoc.ai.auth.entity.User;
 import com.securedoc.ai.document.dto.DocumentUploadResponse;
 import com.securedoc.ai.document.entity.Document;
 import com.securedoc.ai.document.repository.DocumentRepository;
+import com.securedoc.ai.pii.entity.PiiDetectionRecord;
+import com.securedoc.ai.pii.model.PiiDetectionResult;
+import com.securedoc.ai.pii.repository.PiiDetectionRepository;
+import com.securedoc.ai.pii.service.PiiDetectionService;
 import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -26,6 +30,8 @@ import java.util.UUID;
 public class DocumentService {
 
     private final DocumentRepository documentRepository;
+    private final PiiDetectionRepository piiDetectionRepository;
+    private final PiiDetectionService piiDetectionService;
 
     @Value("${app.upload.dir}")
     private String uploadDirectory;
@@ -60,12 +66,29 @@ public class DocumentService {
 
         Document saved = documentRepository.save(document);
 
+        List<PiiDetectionResult> detections=piiDetectionService.detectPii(saved.getContent());
+
+        for (PiiDetectionResult detection : detections) {
+            PiiDetectionRecord record = PiiDetectionRecord.builder()
+                    .document(saved)
+                    .piiType(detection.getPiiType())
+                    .piiValue(detection.getPiiValue())
+                    .start(detection.getStart())
+                    .end(detection.getEnd())
+                    .confidence(detection.getConfidence())
+                    .build();
+            piiDetectionRepository.save(record);
+
+        }
+
         return DocumentUploadResponse.builder()
                 .id(saved.getId())
                 .originalName(saved.getOriginalName())
                 .fileType(saved.getFileType())
                 .fileSize(saved.getFileSize())
                 .uploadedAt(saved.getUploadedAt())
+                .piiDetectionsCount(detections.size())
+                .detections(detections)
                 .build();
     }
     private void validateFile(MultipartFile file) throws IllegalArgumentException{
