@@ -52,4 +52,10 @@ public class Document {
 
     @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PiiDetectionRecord> piiDetections;
+
+    @Column(name = "sanitized_content", columnDefinition = "TEXT")
+    private String sanitizedContent;
+
+    @Column(name = "redaction_strategy", length = 50)
+    private String redactionStrategy;
 }
